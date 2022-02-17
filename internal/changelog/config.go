@@ -78,13 +78,13 @@ func (c *Config) saveToFile(filePath string) error {
 	return nil
 }
 
-func (c *Config) loadFromDir(directory string) error {
+func (c *Config) LoadFromDir(directory string) error {
 	filePath := filepath.Join(directory, ConfigFilename)
 	if err := c.loadFromFile(filePath); err != nil {
 		parentDir := filepath.Dir(directory)
 		if parentDir != directory {
 			// move up the directory tree in search for a config file
-			return c.loadFromDir(parentDir)
+			return c.LoadFromDir(parentDir)
 		}
 		return err
 	}

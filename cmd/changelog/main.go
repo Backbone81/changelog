@@ -20,8 +20,8 @@ func clogInit() {
 
 func clogAdd() {
 	clog := changelog.New()
-	if err := clog.LoadConfig(); err != nil {
-		fmt.Println("ERROR: Failed to load changelog config. Did you run init?")
+	if err := clog.Load(); err != nil {
+		fmt.Println("ERROR: Failed to load changelog. Did you run init?")
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -46,18 +46,8 @@ func clogAdd() {
 
 func clogUpdate() {
 	clog := changelog.New()
-	if err := clog.LoadConfig(); err != nil {
-		fmt.Println("ERROR: Failed to load changelog config. Did you run init?")
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	if err := clog.LoadCatalog(); err != nil {
-		fmt.Println("ERROR: Failed to load changelog catalog.")
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	if err := clog.LoadUnreleased(); err != nil {
-		fmt.Println("ERROR: Failed to load unreleased changelog entries.")
+	if err := clog.Load(); err != nil {
+		fmt.Println("ERROR: Failed to load changelog. Did you run init?")
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -76,19 +66,8 @@ func clogUpdate() {
 
 func clogRelease() {
 	clog := changelog.New()
-	if err := clog.LoadConfig(); err != nil {
-		fmt.Println("ERROR: Failed to load changelog config. Did you run init?")
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	if err := clog.LoadCatalog(); err != nil {
-		fmt.Println("ERROR: Failed to load changelog catalog.")
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	if err := clog.LoadUnreleased(); err != nil {
-		fmt.Println("ERROR: Failed to load unreleased changelog entries.")
+	if err := clog.Load(); err != nil {
+		fmt.Println("ERROR: Failed to load changelog. Did you run init?")
 		fmt.Println(err)
 		os.Exit(1)
 	}
