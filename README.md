@@ -17,6 +17,7 @@ $ !!! TO DO !!!
 ```
 
 ## How to use
+
 Initialize the changelog for your development project. In the project root execute:
 ```shell
 $ changelog init
@@ -49,8 +50,14 @@ consolidate all unreleased changelog entries into a single release and clean up 
 Commit the changes to your version control.
 
 ## Customization
+
 If the naming conventions of the changelog utils do not suit your needs, you can always edit the `.changelog.yaml`
 config file and adjust its behavior. Note that you have to rename files and directories manually when you make
 changes to the config file.
 
 You can even customize the template which is used to render the `CHANGELOG.md`. It is a simple Go template.
+
+## TO DO
+* Test install with go install ...
+* Use cobra for subcommands and parameter processing
+* Use Ginko and Gomega for tests

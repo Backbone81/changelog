@@ -2,7 +2,6 @@ package changelog
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -129,7 +128,7 @@ func (c *Changelog) SaveCatalog() error {
 func (c *Changelog) Init() error {
 	c.Config = DefaultConfig
 
-	if err := c.Config.saveToFile(ConfigFilename); err != nil {
+	if err := c.Config.SaveToFile(ConfigFilename); err != nil {
 		return err
 	}
 
@@ -158,13 +157,8 @@ func (c *Changelog) Add(description string) error {
 	}
 	c.Catalog.Unreleased = append(c.Catalog.Unreleased, entry)
 
-	data, err := yaml.Marshal(entry)
-	if err != nil {
-		return fmt.Errorf("failed to marshal entry; %w", err)
-	}
-
-	if err := ioutil.WriteFile(c.getNewUnreleasedEntryFilePath(), data, 0666); err != nil {
-		return fmt.Errorf("failed to write unreleased changelog file; %w", err)
+	if err := entry.SaveToFile(c.getNewUnreleasedEntryFilePath()); err != nil {
+		return fmt.Errorf("failed to add changelog entry; %w", err)
 	}
 
 	return nil

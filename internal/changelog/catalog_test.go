@@ -32,7 +32,7 @@ var testCatalog = Catalog{
 	},
 }
 
-var testCatalogYaml = `unreleased:
+const testCatalogYaml = `unreleased:
 - description: Some feature
 - description: Some bugfix
 releases:
@@ -55,7 +55,7 @@ func TestCatalog_LoadFromFile(t *testing.T) {
 
 	var catalog Catalog
 	if err := catalog.LoadFromFile(filePath); err != nil {
-		t.Errorf("Expected catalog.LoadFromFile() to succeed; got %v", err)
+		t.Errorf("Expected catalog.LoadFromFile(%q) to succeed; got %v", filePath, err)
 	}
 
 	if !reflect.DeepEqual(catalog, testCatalog) {

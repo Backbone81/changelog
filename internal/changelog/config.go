@@ -7,8 +7,10 @@ import (
 	"path/filepath"
 )
 
+// ConfigFilename is the hardcoded file name for the changelog config file
 const ConfigFilename = ".changelog.yaml"
 
+// Config is a struct which holds all relevant configuration options which can be used to tweak the changelog util
 type Config struct {
 	// BaseDir contains the directory where the config file was loaded from, is not serialized into the config file
 	BaseDir string `yaml:"-"`
@@ -32,6 +34,7 @@ type Config struct {
 	Template string `yaml:"template"`
 }
 
+// DefaultConfig provides a standard config for initializing empty config files.
 var DefaultConfig = Config{
 	ChangelogDir:          "changelog",
 	CatalogFileName:       "changelog.yaml",
@@ -50,6 +53,7 @@ var DefaultConfig = Config{
 {{end}}`,
 }
 
+// LoadFromFile reads the config as yaml file from disk.
 func (c *Config) loadFromFile(filePath string) error {
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
@@ -65,7 +69,8 @@ func (c *Config) loadFromFile(filePath string) error {
 	return nil
 }
 
-func (c *Config) saveToFile(filePath string) error {
+// SaveToFile writes the config as yaml file to disk.
+func (c *Config) SaveToFile(filePath string) error {
 	data, err := yaml.Marshal(*c)
 	if err != nil {
 		return fmt.Errorf("failed to marshal config; %w", err)
@@ -78,6 +83,9 @@ func (c *Config) saveToFile(filePath string) error {
 	return nil
 }
 
+// LoadFromDir tries to load the config from the directory given as parameter. If the config cannot
+// be loaded there, the config will be tried at the parent directory. Traversing up the tree until
+// either a config file is found and loaded or loading fails when no config was found at the root.
 func (c *Config) LoadFromDir(directory string) error {
 	filePath := filepath.Join(directory, ConfigFilename)
 	if err := c.loadFromFile(filePath); err != nil {
