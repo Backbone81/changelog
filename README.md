@@ -13,7 +13,7 @@ To solve this issue, this project provides a tool which makes it very easy.
 
 Install the changelog util into your development environment: 
 ```shell
-$ !!! TO DO !!!
+$ gitlab.com/backbone/changelog/cmd/changelog@latest
 ```
 
 ## How to use
@@ -57,7 +57,14 @@ changes to the config file.
 
 You can even customize the template which is used to render the `CHANGELOG.md`. It is a simple Go template.
 
+## Development
+
+You can run the Makefile with:
+```shell
+$ make
+```
+This will cleanup the module references, format the code and run all tests.
+
 ## TO DO
-* Test install with go install ...
 * Use cobra for subcommands and parameter processing
 * Use Ginko and Gomega for tests
