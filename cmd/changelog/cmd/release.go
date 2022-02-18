@@ -10,6 +10,7 @@ import (
 )
 
 // releaseCmd represents the release command
+var releaseTag string
 var releaseCmd = &cobra.Command{
 	Use:   "release",
 	Short: "Creates a new release",
@@ -31,6 +32,12 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// releaseCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	releaseCmd.Flags().StringVarP(
+		&releaseTag,
+		"tag",
+		"t",
+		"",
+		"The version string to use for the release (i.e. 'v1.5.2')")
 }
 
 func clogRelease() {
@@ -41,16 +48,19 @@ func clogRelease() {
 		os.Exit(1)
 	}
 
-	fmt.Print("Release version (i.e. 'v1.5.3'): ")
-	reader := bufio.NewReader(os.Stdin)
-	version, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Println("ERROR: Failed to create a changelog release.")
-		fmt.Println(err)
-		os.Exit(1)
+	if releaseTag == "" {
+		fmt.Print("Release version (i.e. 'v1.5.3'): ")
+		reader := bufio.NewReader(os.Stdin)
+		stdioReleaseTag, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("ERROR: Failed to create a changelog release.")
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		releaseTag = stdioReleaseTag
 	}
 
-	if err := clog.CreateRelease(version); err != nil {
+	if err := clog.CreateRelease(releaseTag); err != nil {
 		fmt.Println("ERROR: Failed to create a changelog release.")
 		fmt.Println(err)
 		os.Exit(1)

@@ -10,6 +10,7 @@ import (
 )
 
 // addCmd represents the add command
+var description string
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Adds a new changelog entry",
@@ -31,6 +32,12 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	addCmd.Flags().StringVarP(
+		&description,
+		"description",
+		"d",
+		"",
+		"A string describing the change for the end user.")
 }
 
 func clogAdd() {
@@ -41,16 +48,19 @@ func clogAdd() {
 		os.Exit(1)
 	}
 
-	fmt.Print("New changelog description: ")
-	reader := bufio.NewReader(os.Stdin)
-	description, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Println("ERROR: Failed to add new changelog entry.")
-		fmt.Println(err)
-		os.Exit(1)
+	if description == "" {
+		fmt.Print("New changelog description: ")
+		reader := bufio.NewReader(os.Stdin)
+		stdinDescription, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("ERROR: Failed to add new changelog entry.")
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		description = stdinDescription
 	}
 
-	err = clog.Add(description)
+	err := clog.Add(description)
 	if err != nil {
 		fmt.Println("ERROR: Failed to add new changelog entry.")
 		fmt.Println(err)
