@@ -66,5 +66,4 @@ $ make
 This will cleanup the module references, format the code and run all tests.
 
 ## TO DO
-* Use cobra for subcommands and parameter processing
 * Use Ginko and Gomega for tests
