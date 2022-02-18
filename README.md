@@ -13,7 +13,7 @@ To solve this issue, this project provides a tool which makes it very easy.
 
 Install the changelog util into your development environment: 
 ```shell
-$ gitlab.com/backbone/changelog/cmd/changelog@latest
+$ go install gitlab.com/backbone/changelog/cmd/changelog@latest
 ```
 
 ## How to use
