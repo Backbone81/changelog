@@ -1,52 +1,49 @@
-package changelog
+package changelog_test
 
 import (
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"gitlab.com/backbone/changelog/internal/changelog"
 	"io/ioutil"
 	"reflect"
-	"testing"
 )
 
-var testEntry = Entry{
+var testEntry = changelog.Entry{
 	Description: "Some feature",
 }
 
 const testEntryYaml = `description: Some feature
 `
 
-func TestEntry_LoadFromFile(t *testing.T) {
-	ctx := TestContext{}
-	ctx.Init()
-	defer ctx.Shutdown()
+var _ = Describe("changelog.Entry", func() {
+	var ctx TestContext
+	const filePath = "test-entry.yaml"
 
-	filePath := "test-entry.yaml"
-	if err := ioutil.WriteFile(filePath, []byte(testEntryYaml), 0666); err != nil {
-		t.Errorf("Expected ioutil.WriteFile() to succeed; got %v", err)
-	}
+	BeforeEach(func() {
+		ctx.Init()
+	})
 
-	var entry Entry
-	if err := entry.LoadFromFile(filePath); err != nil {
-		t.Errorf("Expected entry.LoadFromFile() to succeed; got %v", err)
-	}
+	AfterEach(func() {
+		ctx.Shutdown()
+	})
 
-	if !reflect.DeepEqual(entry, testEntry) {
-		t.Errorf("Expected entry to be:\n%v\ngot:\n%v", testEntry, entry)
-	}
-}
+	It("should load from file", func() {
+		Expect(ioutil.WriteFile(filePath, []byte(testEntryYaml), 0666)).NotTo(HaveOccurred(),
+			"File path %q", filePath)
 
-func TestEntry_SaveToFile(t *testing.T) {
-	ctx := TestContext{}
-	ctx.Init()
-	defer ctx.Shutdown()
+		var entry changelog.Entry
+		Expect(entry.LoadFromFile(filePath)).NotTo(HaveOccurred(),
+			"File path %q", filePath)
+		Expect(reflect.DeepEqual(entry, testEntry)).To(BeTrue())
+	})
 
-	filePath := "test-entry.yaml"
-	if err := testEntry.SaveToFile(filePath); err != nil {
-		t.Errorf("Expected testEntry.SaveToFile() to succeed; got %v", err)
-	}
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		t.Errorf("Expected to read entry yaml; got %v", err)
-	}
-	if string(data) != testEntryYaml {
-		t.Errorf("Entry yaml does not match expectations.\n--- want: ---\n%s------\n--- got: ---\n%s------", testEntryYaml, string(data))
-	}
-}
+	It("should save to file", func() {
+		Expect(testEntry.SaveToFile(filePath)).NotTo(HaveOccurred(),
+			"File path %q", filePath)
+
+		data, err := ioutil.ReadFile(filePath)
+		Expect(err).NotTo(HaveOccurred(),
+			"File path %q", filePath)
+		Expect(string(data)).To(Equal(testEntryYaml))
+	})
+})

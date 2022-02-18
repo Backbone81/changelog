@@ -19,28 +19,28 @@ func New() *Changelog {
 	return &Changelog{}
 }
 
-func (c *Changelog) getCatalogFilePath() string {
+func (c *Changelog) GetCatalogFilePath() string {
 	return filepath.Join(c.Config.BaseDir, c.Config.ChangelogDir, c.Config.CatalogFileName)
 }
 
-func (c *Changelog) getChangelogDir() string {
+func (c *Changelog) GetChangelogDir() string {
 	return filepath.Join(c.Config.BaseDir, c.Config.ChangelogDir)
 }
 
-func (c *Changelog) getUnreleasedDir() string {
+func (c *Changelog) GetUnreleasedDir() string {
 	return filepath.Join(c.Config.BaseDir, c.Config.ChangelogDir, c.Config.UnreleasedDir)
 }
 
-func (c *Changelog) getUnreleasedKeepFilePath() string {
-	return filepath.Join(c.getUnreleasedDir(), ".keep")
+func (c *Changelog) GetUnreleasedKeepFilePath() string {
+	return filepath.Join(c.GetUnreleasedDir(), ".keep")
 }
 
 func (c *Changelog) getNewUnreleasedEntryFilePath() string {
-	return filepath.Join(c.getUnreleasedDir(), time.Now().Format(c.Config.UnreleasedFilePattern)+".yaml")
+	return filepath.Join(c.GetUnreleasedDir(), time.Now().Format(c.Config.UnreleasedFilePattern)+".yaml")
 }
 
 func (c *Changelog) getUnreleasedChangelogFilePaths() ([]string, error) {
-	entries, err := os.ReadDir(c.getUnreleasedDir())
+	entries, err := os.ReadDir(c.GetUnreleasedDir())
 	if err != nil {
 		return []string{}, fmt.Errorf("failed to get unreleased changelogs; %w", err)
 	}
@@ -49,13 +49,13 @@ func (c *Changelog) getUnreleasedChangelogFilePaths() ([]string, error) {
 	for _, entry := range entries {
 		if !entry.IsDir() &&
 			filepath.Ext(strings.ToLower(entry.Name())) == ".yaml" {
-			filePaths = append(filePaths, filepath.Join(c.getUnreleasedDir(), entry.Name()))
+			filePaths = append(filePaths, filepath.Join(c.GetUnreleasedDir(), entry.Name()))
 		}
 	}
 	return filePaths, nil
 }
 
-func (c *Changelog) getChangelogFilePath() string {
+func (c *Changelog) GetChangelogFilePath() string {
 	return filepath.Join(c.Config.BaseDir, c.Config.ChangelogFileName)
 }
 
@@ -73,7 +73,7 @@ func (c *Changelog) loadConfig() error {
 }
 
 func (c *Changelog) loadCatalog() error {
-	return c.Catalog.LoadFromFile(c.getCatalogFilePath())
+	return c.Catalog.LoadFromFile(c.GetCatalogFilePath())
 }
 
 func (c *Changelog) loadUnreleased() error {
@@ -119,7 +119,7 @@ func (c *Changelog) Load() error {
 }
 
 func (c *Changelog) SaveCatalog() error {
-	if err := c.Catalog.SaveToFile(c.getCatalogFilePath()); err != nil {
+	if err := c.Catalog.SaveToFile(c.GetCatalogFilePath()); err != nil {
 		return fmt.Errorf("failed to save catalog to file; %w", err)
 	}
 	return nil
@@ -132,15 +132,15 @@ func (c *Changelog) Init() error {
 		return err
 	}
 
-	if err := os.MkdirAll(c.getChangelogDir(), 0777); err != nil {
+	if err := os.MkdirAll(c.GetChangelogDir(), 0777); err != nil {
 		return err
 	}
 
-	if err := os.MkdirAll(c.getUnreleasedDir(), 0777); err != nil {
+	if err := os.MkdirAll(c.GetUnreleasedDir(), 0777); err != nil {
 		return err
 	}
 
-	if err := ioutil.WriteFile(c.getUnreleasedKeepFilePath(), []byte{}, 0666); err != nil {
+	if err := ioutil.WriteFile(c.GetUnreleasedKeepFilePath(), []byte{}, 0666); err != nil {
 		return err
 	}
 
@@ -170,7 +170,7 @@ func (c *Changelog) RenderChangelog() error {
 		return fmt.Errorf("failed to parse changelog template; %w", err)
 	}
 
-	file, err := os.Create(c.getChangelogFilePath())
+	file, err := os.Create(c.GetChangelogFilePath())
 	if err != nil {
 		return fmt.Errorf("failed to create changelog file; %w", err)
 	}
@@ -190,7 +190,7 @@ func (c *Changelog) CreateRelease(version string) error {
 	}
 	c.Catalog.Releases = append([]Release{release}, c.Catalog.Releases...)
 	c.Catalog.Unreleased = []Entry{}
-	if err := c.Catalog.SaveToFile(c.getCatalogFilePath()); err != nil {
+	if err := c.Catalog.SaveToFile(c.GetCatalogFilePath()); err != nil {
 		return fmt.Errorf("failed to save changelog catalog; %w", err)
 	}
 

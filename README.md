@@ -67,4 +67,3 @@ This will cleanup the module references, format the code and run all tests.
 
 ## TO DO
 * changelog init overwrites existing config and catalog files - this is dangerous
-* Use Ginko and Gomega for tests

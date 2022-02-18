@@ -1,14 +1,16 @@
-package changelog
+package changelog_test
 
 import (
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"gitlab.com/backbone/changelog/internal/changelog"
 	"io/ioutil"
 	"reflect"
-	"testing"
 	"time"
 )
 
-var testCatalog = Catalog{
-	Unreleased: []Entry{
+var testCatalog = changelog.Catalog{
+	Unreleased: []changelog.Entry{
 		{
 			Description: "Some feature",
 		},
@@ -16,11 +18,11 @@ var testCatalog = Catalog{
 			Description: "Some bugfix",
 		},
 	},
-	Releases: []Release{
+	Releases: []changelog.Release{
 		{
 			Version: "v1.5.3",
 			Date:    time.Date(2020, 4, 2, 0, 0, 0, 0, time.UTC),
-			Entries: []Entry{
+			Entries: []changelog.Entry{
 				{
 					Description: "Great feature",
 				},
@@ -43,40 +45,35 @@ releases:
   - description: Small feature
 `
 
-func TestCatalog_LoadFromFile(t *testing.T) {
-	ctx := TestContext{}
-	ctx.Init()
-	defer ctx.Shutdown()
+var _ = Describe("changelog.Catalog", func() {
+	var ctx TestContext
+	const filePath = "test-catalog.yaml"
 
-	filePath := "test-catalog.yaml"
-	if err := ioutil.WriteFile(filePath, []byte(testCatalogYaml), 0666); err != nil {
-		t.Errorf("Expected ioutil.WriteFile() to succeed; got %v", err)
-	}
+	BeforeEach(func() {
+		ctx.Init()
+	})
 
-	var catalog Catalog
-	if err := catalog.LoadFromFile(filePath); err != nil {
-		t.Errorf("Expected catalog.LoadFromFile(%q) to succeed; got %v", filePath, err)
-	}
+	AfterEach(func() {
+		ctx.Shutdown()
+	})
 
-	if !reflect.DeepEqual(catalog, testCatalog) {
-		t.Errorf("Expected catalog to be:\n%v\ngot:\n%v", testCatalog, catalog)
-	}
-}
+	It("should load from file", func() {
+		Expect(ioutil.WriteFile(filePath, []byte(testCatalogYaml), 0666)).ToNot(HaveOccurred(),
+			"File path %q", filePath)
 
-func TestCatalog_SaveToFile(t *testing.T) {
-	ctx := TestContext{}
-	ctx.Init()
-	defer ctx.Shutdown()
+		var catalog changelog.Catalog
+		Expect(catalog.LoadFromFile(filePath)).ToNot(HaveOccurred(),
+			"File path %q", filePath)
+		Expect(reflect.DeepEqual(catalog, testCatalog)).To(BeTrue())
+	})
 
-	filePath := "test-catalog.yaml"
-	if err := testCatalog.SaveToFile(filePath); err != nil {
-		t.Errorf("Expected testCatalog.SaveToFile() to succeed; got %v", err)
-	}
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		t.Errorf("Expected to read catalog yaml; got %v", err)
-	}
-	if string(data) != testCatalogYaml {
-		t.Errorf("Catalog yaml does not match expectations.\n--- want: ---\n%s------\n--- got: ---\n%s------", testCatalogYaml, string(data))
-	}
-}
+	It("should save to file", func() {
+		Expect(testCatalog.SaveToFile(filePath)).ToNot(HaveOccurred(),
+			"File path %q", filePath)
+
+		data, err := ioutil.ReadFile(filePath)
+		Expect(err).ToNot(HaveOccurred(),
+			"File path %q", filePath)
+		Expect(string(data)).To(Equal(testCatalogYaml))
+	})
+})

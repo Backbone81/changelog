@@ -1,11 +1,13 @@
-package changelog
+package changelog_test
 
 import (
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"gitlab.com/backbone/changelog/internal/changelog"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
-	"testing"
 )
 
 const testConfigYaml = `changelogDir: changelog
@@ -29,66 +31,43 @@ template: |-
   {{end}}
 `
 
-func TestConfig_LoadFromDir(t *testing.T) {
-	ctx := TestContext{}
-	ctx.Init()
-	defer ctx.Shutdown()
+var _ = Describe("changelog.Config", func() {
+	var ctx TestContext
 
-	if err := ioutil.WriteFile(ConfigFilename, []byte(testConfigYaml), 0666); err != nil {
-		t.Errorf("Expected ioutil.WriteFile() to succeed; got %v", err)
-	}
+	BeforeEach(func() {
+		ctx.Init()
+	})
 
-	var config Config
-	if err := config.LoadFromDir(""); err != nil {
-		t.Errorf("Expected config.LoadFromDir() to succeed; got %v", err)
-	}
+	AfterEach(func() {
+		ctx.Shutdown()
+	})
 
-	if !reflect.DeepEqual(config, DefaultConfig) {
-		t.Errorf("Expected config to be:\n%v\ngot:\n%v", DefaultConfig, config)
-	}
-}
+	It("should load from directory", func() {
+		Expect(ioutil.WriteFile(changelog.ConfigFilename, []byte(testConfigYaml), 0666)).Error().ToNot(HaveOccurred())
 
-func TestConfig_LoadFromDir_Parent(t *testing.T) {
-	ctx := TestContext{}
-	ctx.Init()
-	defer ctx.Shutdown()
+		var config changelog.Config
+		Expect(config.LoadFromDir("")).Error().ToNot(HaveOccurred())
+		Expect(reflect.DeepEqual(config, changelog.DefaultConfig)).To(BeTrue())
+	})
 
-	if err := ioutil.WriteFile(ConfigFilename, []byte(testConfigYaml), 0666); err != nil {
-		t.Errorf("Expected ioutil.WriteFile() to succeed; got %v", err)
-	}
+	It("should load from parent directory", func() {
+		Expect(ioutil.WriteFile(changelog.ConfigFilename, []byte(testConfigYaml), 0666)).Error().ToNot(HaveOccurred())
 
-	subdir := filepath.Join(ctx.TempDir, "subdir")
-	if err := os.MkdirAll(subdir, 0777); err != nil {
-		t.Errorf("Expected os.MkdirAll() for %q to succeed; got %v", subdir, err)
-	}
-	if err := os.Chdir(subdir); err != nil {
-		t.Errorf("Expected os.Chdir() for %q to succeed; got %v", subdir, err)
-	}
+		subdir := filepath.Join(ctx.TempDir, "subdir")
+		Expect(os.MkdirAll(subdir, 0777)).Error().ToNot(HaveOccurred())
+		Expect(os.Chdir(subdir)).Error().ToNot(HaveOccurred())
 
-	var config Config
-	if err := config.LoadFromDir(subdir); err != nil {
-		t.Errorf("Expected config.LoadFromDir(%q) to succeed; got %v", subdir, err)
-	}
+		var config changelog.Config
+		Expect(config.LoadFromDir(subdir)).Error().ToNot(HaveOccurred())
 
-	config.BaseDir = "" // we need to reset BaseDir because it is not serialized into the yaml
-	if !reflect.DeepEqual(config, DefaultConfig) {
-		t.Errorf("Expected config to be:\n%v\ngot:\n%v", DefaultConfig, config)
-	}
-}
+		config.BaseDir = "" // we need to reset BaseDir because it is not serialized into the yaml
+		Expect(reflect.DeepEqual(config, changelog.DefaultConfig)).To(BeTrue())
+	})
 
-func TestConfig_SaveToFile(t *testing.T) {
-	ctx := TestContext{}
-	ctx.Init()
-	defer ctx.Shutdown()
-
-	if err := DefaultConfig.SaveToFile(ConfigFilename); err != nil {
-		t.Errorf("Expected DefaultConfig.SaveToFile(%q) to succeed; got %v", ConfigFilename, err)
-	}
-	data, err := ioutil.ReadFile(ConfigFilename)
-	if err != nil {
-		t.Errorf("Expected to read config yaml; got %v", err)
-	}
-	if string(data) != testConfigYaml {
-		t.Errorf("Config yaml does not match expectations.\n--- want: ---\n%s------\n--- got: ---\n%s------", testConfigYaml, string(data))
-	}
-}
+	It("should save to file", func() {
+		Expect(changelog.DefaultConfig.SaveToFile(changelog.ConfigFilename)).Error().ToNot(HaveOccurred())
+		data, err := ioutil.ReadFile(changelog.ConfigFilename)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(string(data)).To(Equal(testConfigYaml))
+	})
+})
