@@ -4,7 +4,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"gitlab.com/backbone/changelog/internal/changelog"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 var _ = Describe("changelog.Changelog", func() {
@@ -27,6 +29,23 @@ var _ = Describe("changelog.Changelog", func() {
 		Expect(os.Stat(clog.GetUnreleasedDir())).Error().ToNot(HaveOccurred())
 		Expect(os.Stat(clog.GetUnreleasedKeepFilePath())).Error().ToNot(HaveOccurred())
 		Expect(os.Stat(clog.GetCatalogFilePath())).Error().ToNot(HaveOccurred())
+	})
+
+	It("should not overwrite existing files on init", func() {
+		const testContent = `some file content not relevant to the project`
+		clog := changelog.New()
+
+		Expect(ioutil.WriteFile(changelog.ConfigFilename, []byte(testContent), 0666)).Error().ToNot(HaveOccurred())
+		Expect(os.MkdirAll(filepath.Dir(clog.GetUnreleasedKeepFilePath()), 0777)).Error().ToNot(HaveOccurred())
+		Expect(ioutil.WriteFile(clog.GetUnreleasedKeepFilePath(), []byte(testContent), 0666)).Error().ToNot(HaveOccurred())
+		Expect(os.MkdirAll(filepath.Dir(clog.GetCatalogFilePath()), 0777)).Error().ToNot(HaveOccurred())
+		Expect(ioutil.WriteFile(clog.GetCatalogFilePath(), []byte(testContent), 0666)).Error().ToNot(HaveOccurred())
+
+		Expect(clog.Init()).Error().ToNot(HaveOccurred())
+
+		Expect(ioutil.ReadFile(changelog.ConfigFilename)).To(Equal([]byte(testContent)))
+		Expect(ioutil.ReadFile(clog.GetUnreleasedKeepFilePath())).To(Equal([]byte(testContent)))
+		Expect(ioutil.ReadFile(clog.GetCatalogFilePath())).To(Equal([]byte(testContent)))
 	})
 
 	Describe("initialized changelog", func() {

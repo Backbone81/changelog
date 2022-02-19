@@ -16,7 +16,9 @@ type Changelog struct {
 }
 
 func New() *Changelog {
-	return &Changelog{}
+	return &Changelog{
+		Config: DefaultConfig,
+	}
 }
 
 func (c *Changelog) GetCatalogFilePath() string {
@@ -125,11 +127,18 @@ func (c *Changelog) SaveCatalog() error {
 	return nil
 }
 
-func (c *Changelog) Init() error {
-	c.Config = DefaultConfig
+func fileExists(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return err == nil
+}
 
-	if err := c.Config.SaveToFile(ConfigFilename); err != nil {
-		return err
+func (c *Changelog) Init() error {
+	if fileExists(ConfigFilename) {
+		fmt.Printf("WARNING: Skipping creation of %q because it already exists.\n", ConfigFilename)
+	} else {
+		if err := c.Config.SaveToFile(ConfigFilename); err != nil {
+			return err
+		}
 	}
 
 	if err := os.MkdirAll(c.GetChangelogDir(), 0777); err != nil {
@@ -140,12 +149,20 @@ func (c *Changelog) Init() error {
 		return err
 	}
 
-	if err := ioutil.WriteFile(c.GetUnreleasedKeepFilePath(), []byte{}, 0666); err != nil {
-		return err
+	if fileExists(c.GetUnreleasedKeepFilePath()) {
+		fmt.Printf("WARNING: Skipping creation of %q because it already exists.\n", c.GetUnreleasedKeepFilePath())
+	} else {
+		if err := ioutil.WriteFile(c.GetUnreleasedKeepFilePath(), []byte{}, 0666); err != nil {
+			return err
+		}
 	}
 
-	if err := c.SaveCatalog(); err != nil {
-		return err
+	if fileExists(c.GetCatalogFilePath()) {
+		fmt.Printf("WARNING: Skipping creation of %q because it already exists.\n", c.GetCatalogFilePath())
+	} else {
+		if err := c.SaveCatalog(); err != nil {
+			return err
+		}
 	}
 
 	return nil
