@@ -1,3 +1,4 @@
+.PHONY: all
 all:
 	go mod tidy
 	go fmt ./...

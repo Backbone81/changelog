@@ -58,17 +58,17 @@ var _ = Describe("changelog.Catalog", func() {
 	})
 
 	It("should load from file", func() {
-		Expect(ioutil.WriteFile(filePath, []byte(testCatalogYaml), 0666)).ToNot(HaveOccurred(),
+		Expect(ioutil.WriteFile(filePath, []byte(testCatalogYaml), 0666)).Error().ToNot(HaveOccurred(),
 			"File path %q", filePath)
 
 		var catalog changelog.Catalog
-		Expect(catalog.LoadFromFile(filePath)).ToNot(HaveOccurred(),
+		Expect(catalog.LoadFromFile(filePath)).Error().ToNot(HaveOccurred(),
 			"File path %q", filePath)
 		Expect(reflect.DeepEqual(catalog, testCatalog)).To(BeTrue())
 	})
 
 	It("should save to file", func() {
-		Expect(testCatalog.SaveToFile(filePath)).ToNot(HaveOccurred(),
+		Expect(testCatalog.SaveToFile(filePath)).Error().ToNot(HaveOccurred(),
 			"File path %q", filePath)
 
 		data, err := ioutil.ReadFile(filePath)
