@@ -1,5 +1,11 @@
 unreleased: []
 releases:
+- version: v1.1.0
+  date: 2024-07-18T02:00:00+02:00
+  entries:
+  - description: Updated to Go 1.22 and all third party libraries were bumped to the
+      recent version.
+  - description: Added version sub-command.
 - version: |
     v1.0.0
   date: 2022-10-29T02:00:00+02:00

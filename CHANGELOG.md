@@ -5,6 +5,11 @@
 ## Unreleased
 
 
+## v1.1.0 (2024-07-18)
+
+- Updated to Go 1.22 and all third party libraries were bumped to the recent version.
+- Added version sub-command.
+
 ## v1.0.0 (2022-10-29)
 
 - Initial release.
