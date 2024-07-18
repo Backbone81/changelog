@@ -13,9 +13,6 @@ var rootCmd = &cobra.Command{
 	Long: `Changelog makes the handling of changelogs easy by treating each changelog entry as an individual
 yaml file with a timestamp. That way it prevents merge conflicts on the changelog and makes it easy to
 cherry pick changes into multiple branches.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
