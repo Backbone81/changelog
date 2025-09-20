@@ -1,12 +1,14 @@
 package changelog_test
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	"gitlab.com/backbone/changelog/internal/changelog"
-	"io/ioutil"
+	"os"
 	"reflect"
 	"time"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
+	"github.com/backbone81/changelog/internal/changelog"
 )
 
 var testCatalog = changelog.Catalog{
@@ -58,7 +60,7 @@ var _ = Describe("changelog.Catalog", func() {
 	})
 
 	It("should load from file", func() {
-		Expect(ioutil.WriteFile(filePath, []byte(testCatalogYaml), 0666)).Error().ToNot(HaveOccurred(),
+		Expect(os.WriteFile(filePath, []byte(testCatalogYaml), 0o664)).Error().ToNot(HaveOccurred(), //nolint:gosec // Those permissions are fine
 			"File path %q", filePath)
 
 		var catalog changelog.Catalog
@@ -71,7 +73,7 @@ var _ = Describe("changelog.Catalog", func() {
 		Expect(testCatalog.SaveToFile(filePath)).Error().ToNot(HaveOccurred(),
 			"File path %q", filePath)
 
-		data, err := ioutil.ReadFile(filePath)
+		data, err := os.ReadFile(filePath)
 		Expect(err).ToNot(HaveOccurred(),
 			"File path %q", filePath)
 		Expect(string(data)).To(Equal(testCatalogYaml))

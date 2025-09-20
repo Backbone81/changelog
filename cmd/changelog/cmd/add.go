@@ -3,22 +3,25 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"gitlab.com/backbone/changelog/internal/changelog"
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/backbone81/changelog/internal/changelog"
 )
 
-// addCmd represents the add command
-var description string
-var addCmd = &cobra.Command{
-	Use:   "add",
-	Short: "Adds a new changelog entry",
-	Long:  `Adds a new changelog entry as unreleased changelog.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		clogAdd()
-	},
-}
+// addCmd represents the add command.
+var (
+	description string
+	addCmd      = &cobra.Command{
+		Use:   "add",
+		Short: "Adds a new changelog entry",
+		Long:  `Adds a new changelog entry as unreleased changelog.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			clogAdd()
+		},
+	}
+)
 
 func init() {
 	rootCmd.AddCommand(addCmd)

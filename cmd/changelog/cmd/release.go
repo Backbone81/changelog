@@ -3,22 +3,25 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"gitlab.com/backbone/changelog/internal/changelog"
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/backbone81/changelog/internal/changelog"
 )
 
-// releaseCmd represents the release command
-var releaseTag string
-var releaseCmd = &cobra.Command{
-	Use:   "release",
-	Short: "Creates a new release",
-	Long:  `Creates a new release and consolidates all unreleased changelogs into it.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		clogRelease()
-	},
-}
+// releaseCmd represents the release command.
+var (
+	releaseTag string
+	releaseCmd = &cobra.Command{
+		Use:   "release",
+		Short: "Creates a new release",
+		Long:  `Creates a new release and consolidates all unreleased changelogs into it.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			clogRelease()
+		},
+	}
+)
 
 func init() {
 	rootCmd.AddCommand(releaseCmd)

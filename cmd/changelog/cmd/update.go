@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"gitlab.com/backbone/changelog/internal/changelog"
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/backbone81/changelog/internal/changelog"
 )
 
-// updateCmd represents the update command
+// updateCmd represents the update command.
 var updateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Updates the end user changelog file with the current state",

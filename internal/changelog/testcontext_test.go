@@ -1,16 +1,18 @@
 package changelog_test
 
 import (
-	. "github.com/onsi/gomega"
-	"gitlab.com/backbone/changelog/internal/changelog"
 	"os"
+
+	. "github.com/onsi/gomega"
+
+	"github.com/backbone81/changelog/internal/changelog"
 )
 
 func init() {
 	// change the default file pattern to include fractional seconds
 	// otherwise we would overwrite the same file if we create multiple unreleased changelog entries
 	// in quick succession
-	changelog.DefaultConfig.UnreleasedFilePattern = changelog.DefaultConfig.UnreleasedFilePattern + ".000000"
+	changelog.DefaultConfig.UnreleasedFilePattern += ".000000"
 }
 
 type TestContext struct {

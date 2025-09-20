@@ -1,11 +1,12 @@
+# This is the Go package to run a target against. Useful for running tests of one package, for example.
+PACKAGE ?= ./...
+
+# We want to have our binaries in the bin subdirectory available. In addition we want them to have priority over
+# binaries somewhere else on the system.
+export PATH := $(CURDIR)/bin:$(PATH)
+
 .PHONY: all
 all: build
-
-.PHONY: prepare
-prepare:
-	go mod tidy
-	go fmt ./...
-	go vet ./...
 
 .PHONY: build
 build: prepare
@@ -13,4 +14,15 @@ build: prepare
 
 .PHONY: test
 test: prepare
-	go test ./...
+	go test $(PACKAGE)
+
+.PHONY: prepare
+prepare:
+	go mod tidy
+	go fmt $(PACKAGE)
+	go vet $(PACKAGE)
+	golangci-lint run --fix
+
+.PHONY: clean
+clean:
+	rm -rf tmp

@@ -1,8 +1,8 @@
 package changelog
 
 import (
+	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -68,7 +68,7 @@ func (c *Changelog) loadConfig() error {
 	}
 
 	if err := c.Config.LoadFromDir(workingDir); err != nil {
-		return fmt.Errorf("failed to load config file")
+		return errors.New("failed to load config file")
 	}
 
 	return nil
@@ -141,18 +141,18 @@ func (c *Changelog) Init() error {
 		}
 	}
 
-	if err := os.MkdirAll(c.GetChangelogDir(), 0777); err != nil {
+	if err := os.MkdirAll(c.GetChangelogDir(), 0o775); err != nil { //nolint:gosec // Those permissions are fine
 		return err
 	}
 
-	if err := os.MkdirAll(c.GetUnreleasedDir(), 0777); err != nil {
+	if err := os.MkdirAll(c.GetUnreleasedDir(), 0o775); err != nil { //nolint:gosec // Those permissions are fine
 		return err
 	}
 
 	if fileExists(c.GetUnreleasedKeepFilePath()) {
 		fmt.Printf("WARNING: Skipping creation of %q because it already exists.\n", c.GetUnreleasedKeepFilePath())
 	} else {
-		if err := ioutil.WriteFile(c.GetUnreleasedKeepFilePath(), []byte{}, 0666); err != nil {
+		if err := os.WriteFile(c.GetUnreleasedKeepFilePath(), []byte{}, 0o664); err != nil { //nolint:gosec // Those permissions are fine
 			return err
 		}
 	}
@@ -191,7 +191,7 @@ func (c *Changelog) RenderChangelog() error {
 	if err != nil {
 		return fmt.Errorf("failed to create changelog file; %w", err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	if err := templ.Execute(file, c); err != nil {
 		return fmt.Errorf("failed to render changelog template; %w", err)

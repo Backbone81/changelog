@@ -2,15 +2,16 @@ package changelog
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
+	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v2"
 )
 
-// ConfigFilename is the hardcoded file name for the changelog config file
+// ConfigFilename is the hardcoded file name for the changelog config file.
 const ConfigFilename = ".changelog.yaml"
 
-// Config is a struct which holds all relevant configuration options which can be used to tweak the changelog util
+// Config is a struct which holds all relevant configuration options which can be used to tweak the changelog util.
 type Config struct {
 	// BaseDir contains the directory where the config file was loaded from, is not serialized into the config file
 	BaseDir string `yaml:"-"`
@@ -39,7 +40,7 @@ var DefaultConfig = Config{
 	ChangelogDir:          "changelog",
 	CatalogFileName:       "changelog.yaml",
 	UnreleasedDir:         "unreleased",
-	UnreleasedFilePattern: "changelog-20060201-150405",
+	UnreleasedFilePattern: "changelog-20060102-150405",
 	ChangelogFileName:     "CHANGELOG.md",
 	Template: `# Changelog
 
@@ -58,7 +59,7 @@ var DefaultConfig = Config{
 
 // LoadFromFile reads the config as yaml file from disk.
 func (c *Config) loadFromFile(filePath string) error {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) //nolint:gosec
 	if err != nil {
 		return fmt.Errorf("failed to read config file; %w", err)
 	}
@@ -79,7 +80,7 @@ func (c *Config) SaveToFile(filePath string) error {
 		return fmt.Errorf("failed to marshal config; %w", err)
 	}
 
-	if err := ioutil.WriteFile(filePath, data, 0666); err != nil {
+	if err := os.WriteFile(filePath, data, 0o664); err != nil { //nolint:gosec // Those permissions are fine
 		return fmt.Errorf("failed to write config file; %w", err)
 	}
 

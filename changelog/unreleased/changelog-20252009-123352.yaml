@@ -1,0 +1,2 @@
+description: |
+  Reduced the file and directory permissions to not include writeable for others.

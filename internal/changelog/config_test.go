@@ -1,19 +1,20 @@
 package changelog_test
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	"gitlab.com/backbone/changelog/internal/changelog"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
+	"github.com/backbone81/changelog/internal/changelog"
 )
 
 const testConfigYaml = `changelogDir: changelog
 catalogFileName: changelog.yaml
 unreleasedDir: unreleased
-unreleasedFilePattern: changelog-20060201-150405.000000
+unreleasedFilePattern: changelog-20060102-150405.000000
 changelogFileName: CHANGELOG.md
 template: |-
   # Changelog
@@ -43,7 +44,7 @@ var _ = Describe("changelog.Config", func() {
 	})
 
 	It("should load from directory", func() {
-		Expect(ioutil.WriteFile(changelog.ConfigFilename, []byte(testConfigYaml), 0666)).Error().ToNot(HaveOccurred())
+		Expect(os.WriteFile(changelog.ConfigFilename, []byte(testConfigYaml), 0o664)).Error().ToNot(HaveOccurred()) //nolint:gosec // Those permissions are fine
 
 		var config changelog.Config
 		Expect(config.LoadFromDir("")).Error().ToNot(HaveOccurred())
@@ -51,10 +52,10 @@ var _ = Describe("changelog.Config", func() {
 	})
 
 	It("should load from parent directory", func() {
-		Expect(ioutil.WriteFile(changelog.ConfigFilename, []byte(testConfigYaml), 0666)).Error().ToNot(HaveOccurred())
+		Expect(os.WriteFile(changelog.ConfigFilename, []byte(testConfigYaml), 0o664)).Error().ToNot(HaveOccurred()) //nolint:gosec // Those permissions are fine
 
 		subdir := filepath.Join(ctx.TempDir, "subdir")
-		Expect(os.MkdirAll(subdir, 0777)).Error().ToNot(HaveOccurred())
+		Expect(os.MkdirAll(subdir, 0o775)).Error().ToNot(HaveOccurred()) //nolint:gosec // Those permissions are fine
 		Expect(os.Chdir(subdir)).Error().ToNot(HaveOccurred())
 
 		var config changelog.Config
@@ -66,7 +67,7 @@ var _ = Describe("changelog.Config", func() {
 
 	It("should save to file", func() {
 		Expect(changelog.DefaultConfig.SaveToFile(changelog.ConfigFilename)).Error().ToNot(HaveOccurred())
-		data, err := ioutil.ReadFile(changelog.ConfigFilename)
+		data, err := os.ReadFile(changelog.ConfigFilename)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(string(data)).To(Equal(testConfigYaml))
 	})

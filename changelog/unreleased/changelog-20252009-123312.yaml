@@ -1,0 +1,2 @@
+description: |
+  Dropped deprectated Go functionality and replaced it with new one (ioutil/os).

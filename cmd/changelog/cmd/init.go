@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"gitlab.com/backbone/changelog/internal/changelog"
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/backbone81/changelog/internal/changelog"
 )
 
-// initCmd represents the init command
+// initCmd represents the init command.
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initializes a new changelog environment",

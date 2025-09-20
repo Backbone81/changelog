@@ -2,11 +2,12 @@ package changelog
 
 import (
 	"fmt"
+	"os"
+
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
 )
 
-// Entry is a struct which holds all relevant information about a single changelog entry
+// Entry is a struct which holds all relevant information about a single changelog entry.
 type Entry struct {
 	Description string // Description provides some plain text describing the change
 }
@@ -18,7 +19,7 @@ func (e *Entry) SaveToFile(filePath string) error {
 		return fmt.Errorf("failed to marshal entry; %w", err)
 	}
 
-	if err := ioutil.WriteFile(filePath, data, 0666); err != nil {
+	if err := os.WriteFile(filePath, data, 0o664); err != nil { //nolint:gosec // Those permissions are fine
 		return fmt.Errorf("failed to write unreleased changelog file; %w", err)
 	}
 
@@ -27,7 +28,7 @@ func (e *Entry) SaveToFile(filePath string) error {
 
 // LoadFromFile reads the entry as yaml file from disk.
 func (e *Entry) LoadFromFile(filePath string) error {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) //nolint:gosec
 	if err != nil {
 		return fmt.Errorf("failed to read changelog entry; %w", err)
 	}
