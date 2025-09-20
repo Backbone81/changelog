@@ -1,5 +1,21 @@
 unreleased: []
 releases:
+- version: |
+    v1.1.1
+  date: 2025-09-20T02:00:00+02:00
+  entries:
+  - description: |
+      Moved the project over to github.
+  - description: |
+      Bumped all dependencies and Go itself.
+  - description: |
+      Fixed a bug which created the wrong timestamp for file names.
+  - description: |
+      Dropped deprectated Go functionality and replaced it with new one (ioutil/os).
+  - description: |
+      Reduced the file and directory permissions to not include writeable for others.
+  - description: |
+      Introduced golangci-lint as linter.
 - version: v1.1.0
   date: 2024-07-18T02:00:00+02:00
   entries:

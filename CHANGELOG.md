@@ -5,6 +5,15 @@
 ## Unreleased
 
 
+## v1.1.1 (2025-09-20)
+
+- Moved the project over to github.
+- Bumped all dependencies and Go itself.
+- Fixed a bug which created the wrong timestamp for file names.
+- Dropped deprectated Go functionality and replaced it with new one (ioutil/os).
+- Reduced the file and directory permissions to not include writeable for others.
+- Introduced golangci-lint as linter.
+
 ## v1.1.0 (2024-07-18)
 
 - Updated to Go 1.22 and all third party libraries were bumped to the recent version.
