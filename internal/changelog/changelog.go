@@ -3,11 +3,19 @@ package changelog
 import (
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
+)
+
+var (
+	ErrNoUnreleasedChanges         = errors.New("automatic tag detection does not work without unreleased changelogs")
+	ErrEntriesWithoutSeverityFound = errors.New("all entries must have a severity for the automatic tag detection to work")
+	ErrLastTagMalformed            = errors.New("last tag is malformed")
 )
 
 type Changelog struct {
@@ -168,9 +176,10 @@ func (c *Changelog) Init() error {
 	return nil
 }
 
-func (c *Changelog) Add(description string) error {
+func (c *Changelog) Add(description string, severity Severity) error {
 	entry := Entry{
 		Description: description,
+		Severity:    severity,
 	}
 	c.Catalog.Unreleased = append(c.Catalog.Unreleased, entry)
 
@@ -212,4 +221,66 @@ func (c *Changelog) CreateRelease(version string) error {
 	}
 
 	return c.deleteUnreleasedChangelogs()
+}
+
+func (c *Changelog) NextTag() (string, error) {
+	if len(c.Catalog.Unreleased) == 0 {
+		return "", ErrNoUnreleasedChanges
+	}
+
+	maxSeverity, err := c.getMaximumSeverityFromUnreleased()
+	if err != nil {
+		return "", err
+	}
+
+	lastTag := c.getLastTag()
+
+	pureTag := strings.Trim(lastTag, "v")
+	tagParts := strings.Split(pureTag, ".")
+
+	if len(tagParts) != 3 {
+		return "", ErrLastTagMalformed
+	}
+
+	for severityPositionInTag, tagPart := range tagParts {
+		// Since severity 0 is reserved for unkown due to backwards compatibility the enum starts at 1.
+		// To iterate through the different parts of the tag, corresponding to the different severities, and we need to substract this offset here again.
+		severityPositionToBump := int(maxSeverity) - 1
+
+		if severityPositionInTag < severityPositionToBump {
+			continue
+		}
+		if severityPositionInTag > severityPositionToBump {
+			tagParts[severityPositionInTag] = "0"
+			continue
+		}
+
+		parsedTagPart, err := strconv.Atoi(tagPart)
+		if err != nil {
+			return "", ErrLastTagMalformed
+		}
+		tagParts[severityPositionInTag] = strconv.Itoa(parsedTagPart + 1)
+	}
+
+	newTag := "v" + strings.Join(tagParts, ".")
+	return newTag, nil
+}
+
+func (c *Changelog) getMaximumSeverityFromUnreleased() (Severity, error) {
+	maxSeverity := Severity(math.MaxInt)
+	for _, unreleased := range c.Catalog.Unreleased {
+		if unreleased.Severity == SeverityUnknown {
+			return SeverityUnknown, ErrEntriesWithoutSeverityFound
+		}
+		maxSeverity = min(maxSeverity, unreleased.Severity)
+	}
+	return maxSeverity, nil
+}
+
+func (c *Changelog) getLastTag() string {
+	lastTag := "v0.0.0"
+	if len(c.Catalog.Releases) > 0 {
+		lastTag = c.Catalog.Releases[0].Version
+	}
+	return lastTag
 }

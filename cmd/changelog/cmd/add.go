@@ -13,6 +13,7 @@ import (
 // addCmd represents the add command.
 var (
 	description string
+	severity    string
 	addCmd      = &cobra.Command{
 		Use:   "add",
 		Short: "Adds a new changelog entry",
@@ -31,6 +32,12 @@ func init() {
 		"d",
 		"",
 		"A string describing the change for the end user.")
+	addCmd.Flags().StringVarP(
+		&severity,
+		"severity",
+		"s",
+		"",
+		"An enum describing the severity of the change. (major|minor|patch)")
 }
 
 func clogAdd() {
@@ -53,7 +60,18 @@ func clogAdd() {
 		description = stdinDescription
 	}
 
-	err := clog.Add(description)
+	addingSeverity := changelog.SeverityUnknown
+	if severity != "" {
+		var err error
+		addingSeverity, err = changelog.ParseSeverity(severity)
+		if err != nil {
+			fmt.Println("ERROR: Failed to add new changelog entry.")
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+
+	err := clog.Add(description, addingSeverity)
 	if err != nil {
 		fmt.Println("ERROR: Failed to add new changelog entry.")
 		fmt.Println(err)

@@ -5,6 +5,10 @@
 ## Unreleased
 
 
+## v1.2.0 (2026-11-25)
+
+- Added new severity and auto-tag flags to enable automatic tag determination in automated environments
+
 ## v1.1.1 (2025-09-20)
 
 - Moved the project over to github.

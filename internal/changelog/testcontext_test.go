@@ -42,12 +42,12 @@ func (tc *TestContext) PrepareChangelog() *changelog.Changelog {
 	Expect(clog.Init()).NotTo(HaveOccurred())
 	Expect(clog.Load()).NotTo(HaveOccurred())
 
-	Expect(clog.Add("some new feature")).NotTo(HaveOccurred())
-	Expect(clog.Add("some bugfix")).NotTo(HaveOccurred())
+	Expect(clog.Add("some new feature", 0)).NotTo(HaveOccurred())
+	Expect(clog.Add("some bugfix", 0)).NotTo(HaveOccurred())
 	Expect(clog.CreateRelease("v1.4.3")).NotTo(HaveOccurred())
 
-	Expect(clog.Add("some other feature")).NotTo(HaveOccurred())
-	Expect(clog.Add("some other bugfix")).NotTo(HaveOccurred())
+	Expect(clog.Add("some other feature", 0)).NotTo(HaveOccurred())
+	Expect(clog.Add("some other bugfix", 0)).NotTo(HaveOccurred())
 	Expect(clog.RenderChangelog()).NotTo(HaveOccurred())
 
 	return clog

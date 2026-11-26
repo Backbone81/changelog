@@ -9,7 +9,11 @@ import (
 
 // Entry is a struct which holds all relevant information about a single changelog entry.
 type Entry struct {
-	Description string // Description provides some plain text describing the change
+	// Description provides some plain text describing the change
+	Description string
+
+	// Severity describes the level of a change. Possible values are major, minor and patch
+	Severity Severity `yaml:"severity,omitempty"`
 }
 
 // SaveToFile writes the entry as yaml file to disk.

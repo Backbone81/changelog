@@ -12,7 +12,7 @@ var versionCmd = &cobra.Command{
 	Short: "Displays the version of this tool.",
 	Long:  `Displays the version of this tool.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Changelog v1.1.0")
+		fmt.Println("Changelog v1.2.0")
 	},
 }
 
