@@ -243,8 +243,8 @@ func (c *Changelog) NextTag() (string, error) {
 	}
 
 	for severityPositionInTag, tagPart := range tagParts {
-		// Since severity 0 is reserved for unkown due to backwards compatibility the enum starts at 1.
-		// To iterate through the different parts of the tag, corresponding to the different severities, and we need to substract this offset here again.
+		// Since severity 0 is reserved for unknown due to backwards compatibility the enum starts at 1.
+		// To iterate through the different parts of the tag, corresponding to the different severities, and we need to subtract this offset here again.
 		severityPositionToBump := int(maxSeverity) - 1
 
 		if severityPositionInTag < severityPositionToBump {

@@ -5,7 +5,7 @@ import "errors"
 type Severity int
 
 const (
-	// To keep backwards compatibility (also visually within the yaml files) we need the default (0) to not have an actual value so it will be omitted when writing the yaml output
+	// To keep backwards compatibility (also visually within the yaml files) we need the default (0) to not have an actual value so it will be omitted when writing the yaml output.
 	SeverityUnknown Severity = iota
 	SeverityMajor
 	SeverityMinor
