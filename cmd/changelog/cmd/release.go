@@ -13,6 +13,7 @@ import (
 // releaseCmd represents the release command.
 var (
 	releaseTag string
+	autoTag    bool
 	releaseCmd = &cobra.Command{
 		Use:   "release",
 		Short: "Creates a new release",
@@ -31,6 +32,12 @@ func init() {
 		"t",
 		"",
 		"The version string to use for the release (i.e. 'v1.5.2')")
+	releaseCmd.Flags().BoolVarP(
+		&autoTag,
+		"auto-tag",
+		"a",
+		false,
+		"When set to true, tag will be ignored and changelog will generate the tag by using the severities from the changelogs.")
 }
 
 func clogRelease() {
@@ -41,7 +48,15 @@ func clogRelease() {
 		os.Exit(1)
 	}
 
-	if releaseTag == "" {
+	if autoTag {
+		tag, err := clog.NextTag()
+		if err != nil {
+			fmt.Println("ERROR: Failed to create a changelog release.")
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		releaseTag = tag
+	} else if releaseTag == "" {
 		fmt.Print("Release version (i.e. 'v1.5.3'): ")
 		reader := bufio.NewReader(os.Stdin)
 		stdioReleaseTag, err := reader.ReadString('\n')

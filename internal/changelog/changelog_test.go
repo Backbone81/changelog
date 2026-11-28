@@ -58,7 +58,7 @@ var _ = Describe("changelog.Changelog", func() {
 
 		It("should increment the catalog size on add", func() {
 			beforeUnreleased := len(clog.Catalog.Unreleased)
-			Expect(clog.Add("some new unreleased changelog")).Error().ToNot(HaveOccurred())
+			Expect(clog.Add("some new unreleased changelog", 0)).Error().ToNot(HaveOccurred())
 			Expect(clog.Catalog.Unreleased).To(HaveLen(beforeUnreleased + 1))
 		})
 
@@ -66,7 +66,7 @@ var _ = Describe("changelog.Changelog", func() {
 			beforeUnreleasedFiles, err := os.ReadDir(clog.GetUnreleasedDir())
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(clog.Add("some new unreleased changelog")).Error().ToNot(HaveOccurred())
+			Expect(clog.Add("some new unreleased changelog", 0)).Error().ToNot(HaveOccurred())
 
 			afterUnreleasedFiles, err := os.ReadDir(clog.GetUnreleasedDir())
 			Expect(err).ToNot(HaveOccurred())
@@ -98,6 +98,103 @@ var _ = Describe("changelog.Changelog", func() {
 			Expect(os.Stat(clog.GetChangelogFilePath())).Error().To(HaveOccurred())
 			Expect(clog.RenderChangelog()).Error().ToNot(HaveOccurred())
 			Expect(os.Stat(clog.GetChangelogFilePath())).Error().ToNot(HaveOccurred())
+		})
+	})
+
+	Describe("NextTag", func() {
+		var clog *changelog.Changelog
+
+		BeforeEach(func() {
+			clog = changelog.New()
+			Expect(clog.Init()).NotTo(HaveOccurred())
+			Expect(clog.Load()).NotTo(HaveOccurred())
+		})
+
+		It("should fail without unreleased changes", func() {
+			Expect(clog.NextTag()).Error().To(BeEquivalentTo(changelog.ErrNoUnreleasedChanges))
+		})
+
+		It("should fail with changes without severity", func() {
+			Expect(clog.Add("another big feature", 0)).To(Succeed())
+			Expect(clog.NextTag()).Error().To(BeEquivalentTo(changelog.ErrEntriesWithoutSeverityFound))
+		})
+
+		It("should fail with malformed last tag (invalid numbers)", func() {
+			Expect(clog.CreateRelease("vx.x.x")).To(Succeed())
+			Expect(clog.Add("another big feature", changelog.SeverityPatch)).To(Succeed())
+			Expect(clog.NextTag()).Error().To(BeEquivalentTo(changelog.ErrLastTagMalformed))
+		})
+
+		It("should fail with malformed last tag (invalid format)", func() {
+			Expect(clog.CreateRelease("v0.0")).To(Succeed())
+			Expect(clog.Add("another big feature", changelog.SeverityPatch)).To(Succeed())
+			Expect(clog.NextTag()).Error().To(BeEquivalentTo(changelog.ErrLastTagMalformed))
+		})
+
+		It("should succeed from scratch with patch", func() {
+			Expect(clog.Add("another big feature", changelog.SeverityPatch)).To(Succeed())
+			tag, err := clog.NextTag()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(tag).To(Equal("v0.0.1"))
+		})
+
+		It("should succeed from scratch with minor", func() {
+			Expect(clog.Add("another big feature", changelog.SeverityMinor)).To(Succeed())
+			tag, err := clog.NextTag()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(tag).To(Equal("v0.1.0"))
+		})
+
+		It("should succeed from scratch with major", func() {
+			Expect(clog.Add("another big feature", changelog.SeverityMajor)).To(Succeed())
+			tag, err := clog.NextTag()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(tag).To(Equal("v1.0.0"))
+		})
+
+		It("should succeed with preceding patch tag", func() {
+			Expect(clog.Add("another big feature", changelog.SeverityPatch)).To(Succeed())
+			Expect(clog.CreateRelease("v0.0.1")).Error().ToNot(HaveOccurred())
+			Expect(clog.Add("another big feature", changelog.SeverityPatch)).To(Succeed())
+			tag, err := clog.NextTag()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(tag).To(Equal("v0.0.2"))
+		})
+
+		It("should succeed with preceding minor tag", func() {
+			Expect(clog.Add("another big feature", changelog.SeverityMinor)).To(Succeed())
+			Expect(clog.CreateRelease("v0.1.0")).Error().ToNot(HaveOccurred())
+			Expect(clog.Add("another big feature", changelog.SeverityMinor)).To(Succeed())
+			tag, err := clog.NextTag()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(tag).To(Equal("v0.2.0"))
+		})
+
+		It("should succeed with preceding major tag", func() {
+			Expect(clog.Add("another big feature", changelog.SeverityMajor)).To(Succeed())
+			Expect(clog.CreateRelease("v1.0.0")).Error().ToNot(HaveOccurred())
+			Expect(clog.Add("another big feature", changelog.SeverityMajor)).To(Succeed())
+			tag, err := clog.NextTag()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(tag).To(Equal("v2.0.0"))
+		})
+
+		It("should succeed with minor while resetting patch to 0", func() {
+			Expect(clog.Add("another big feature", 0)).To(Succeed())
+			Expect(clog.CreateRelease("v1.5.3")).Error().ToNot(HaveOccurred())
+			Expect(clog.Add("another big feature", changelog.SeverityMinor)).To(Succeed())
+			tag, err := clog.NextTag()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(tag).To(Equal("v1.6.0"))
+		})
+
+		It("should succeed with major while resetting minor and patch to 0", func() {
+			Expect(clog.Add("another big feature", 0)).To(Succeed())
+			Expect(clog.CreateRelease("v1.5.3")).Error().ToNot(HaveOccurred())
+			Expect(clog.Add("another big feature", changelog.SeverityMajor)).To(Succeed())
+			tag, err := clog.NextTag()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(tag).To(Equal("v2.0.0"))
 		})
 	})
 })
